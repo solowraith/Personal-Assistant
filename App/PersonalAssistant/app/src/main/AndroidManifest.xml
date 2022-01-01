@@ -10,6 +10,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PersonalAssistant">
         <activity
+            android:name=".InformationActivity"
+            android:exported="false"
+            android:label="@string/title_activity_information"
+            android:theme="@style/Theme.PersonalAssistant.NoActionBar" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

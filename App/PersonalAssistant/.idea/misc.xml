@@ -3,7 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/Brendan/Documents/PersonalAssistant/App/PersonalAssistant/app/src/main/res/layout/activity_main.xml" value="0.22" />
+        <entry key="..\:/Users/Brendan/Documents/PersonalAssistant/App/PersonalAssistant/app/src/main/res/layout/activity_information.xml" value="0.5" />
+        <entry key="..\:/Users/Brendan/Documents/PersonalAssistant/App/PersonalAssistant/app/src/main/res/layout/activity_main.xml" value="0.3333333333333333" />
+        <entry key="..\:/Users/Brendan/Documents/PersonalAssistant/App/PersonalAssistant/app/src/main/res/mipmap-anydpi-v26/MicrophoneButton.xml" value="0.35743589743589743" />
       </map>
     </option>
   </component>
