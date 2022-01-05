@@ -13,7 +13,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         android:textColor="@color/white"
-        android:text="Hold for voice commands"
+        android:text="@string/voice_commands"
         app:layout_constraintBottom_toTopOf="@+id/imageButton4"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -26,7 +26,8 @@
         android:layout_height="100dp"
         android:layout_marginTop="312dp"
         android:backgroundTint="@color/colorPrimary"
-        android:text="Manual entry"
+        android:text="@string/manual_entry"
+        android:onClick="toManualEntry"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -42,7 +43,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:srcCompat="@android:drawable/btn_star"
+        app:srcCompat="@android:drawable/ic_btn_speak_now"
         tools:srcCompat="@android:drawable/ic_btn_speak_now" />
 
     <ImageButton
