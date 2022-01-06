@@ -1,11 +1,21 @@
 <resources>
     <string name="app_name">Personal Assistant</string>
     <string name="title_activity_information">InformationActivity</string>
+    <string name="title_Input_Selector">InputSelector</string>
     <!-- Strings used for fragments for navigation -->
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="user_manual">User Manual</string>
     <string name="voice_commands">Hold for voice commands</string>
     <string name="manual_entry">Manual entry</string>
+    <!-- Strings used for Input selector buttons-->
+    <string name="timer">Start a timer</string>
+    <string name="alarm">Set an alarm</string>
+    <string name="reminder">Set a reminder</string>
+    <string name="inc_brightness">Increase brightness</string>
+    <string name="dec_brightness">Decrease brightness</string>
+    <string name="open_app">Open an application</string>
+    <string name="set_user">Set User\'s name</string>
+    <string name="set_assistant">Set Assistant\'s name</string>
 
 </resources>

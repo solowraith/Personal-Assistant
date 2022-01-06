@@ -5,6 +5,7 @@ import android.view.View;
 
 public class InputSelector extends AppCompatActivity
 {
+    @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
