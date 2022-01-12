@@ -1,8 +1,7 @@
 package com.example.personalassistant;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
@@ -12,62 +11,105 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+
 import java.io.IOException;
-import static android.Manifest.permission.RECORD_AUDIO;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 public class MainActivity extends AppCompatActivity {
 
-    ImageButton button;
-    public static final int REQUEST_AUDIO_PERMISSION_CODE = 1;
-    MediaRecorder recorder;
-    MediaPlayer player;
-    String fileName = null;
+    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    private static String fileName = null;
+    private static final String LOG_TAG = "AudioRecordTest";
+    private MediaRecorder recorder = null;
+    private boolean mStartRecording = true;
 
-    private final View.OnTouchListener LISTENER = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
-            {
-                recorder = new MediaRecorder();
-                startRecording();
-            }
-            else if(motionEvent.getAction() == MotionEvent.ACTION_UP)
-            {
-                recorder.stop();
-                recorder.release();
-                recorder = null;
-
-                player = new MediaPlayer();
-                try
-                {
-                    player.setDataSource(fileName);
-                    player.prepare();
-                    player.start();
-                } catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
-            }
-            else
-            {
-                recorder.release();
-                player.release();
-                recorder = null;
-                player = null;
-            }
-            return false;
-        }
-    };
+    // Requesting permission to RECORD_AUDIO
+    private boolean permissionToRecordAccepted = false;
+    private final String [] PERMISSIONS = {Manifest.permission.RECORD_AUDIO};
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION)
+            permissionToRecordAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+
+        if (!permissionToRecordAccepted)
+            finish();
+    }
+
+    private void onRecord(boolean start)
+    {
+        if (start)
+            startRecording();
+        else
+            onStop();
+    }
+
+    private void startRecording()
+    {
+        recorder = new MediaRecorder();
+        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        recorder.setOutputFile(fileName);
+        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        try
+        {
+            recorder.prepare();
+        }
+        catch (IOException e)
+        {
+            Log.e(LOG_TAG, "prepare() failed");
+        }
+
+        recorder.start();
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    @Override
+    public void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        button = findViewById(R.id.imageButton4);
-        button.setOnTouchListener(LISTENER);
+        // Record to the external cache directory for visibility
+        fileName = getExternalCacheDir().getAbsolutePath();
+        fileName += "/userInput.3gp";
+
+        ActivityCompat.requestPermissions(this, PERMISSIONS, REQUEST_RECORD_AUDIO_PERMISSION);
+
+        //Attach button and assign actions
+        ImageButton button = findViewById(R.id.imageButton4);
+        button.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent)
+            {
+                switch(motionEvent.getAction())
+                {
+                    case MotionEvent.ACTION_DOWN:
+                        performClick();
+                        onRecord(mStartRecording);
+                        mStartRecording = !mStartRecording;
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        onStop();
+                        break;
+
+                    default:
+                        break;
+                }
+                return false;
+            }
+            public void performClick()
+            {
+                final MediaPlayer RECORDING = MediaPlayer.create(MainActivity.this, R.raw.recordingsound);
+                RECORDING.start();
+            }
+        });
     }
 
     public void forInformation(View view)
@@ -82,59 +124,14 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void startRecording()
-    {
-        if(!checkPermissions())
-            RequestPermissions();
-        fileName = getExternalCacheDir().getAbsolutePath();
-        fileName += "/recordedAudio.3gp";
-
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        recorder.setOutputFile(fileName);
-
-        try
-        {
-            recorder.prepare();
-        }
-        catch (IOException e)
-        {
-            Log.e("AudioRecordTest", "prepare() failed");
-        }
-
-        recorder.start();
-    }
-
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        // this method is called when user will
-        // grant the permission for audio recording.
-        switch (requestCode) {
-            case REQUEST_AUDIO_PERMISSION_CODE:
-                if (grantResults.length > 0) {
-                    boolean permissionToRecord = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-                    boolean permissionToStore = grantResults[1] == PackageManager.PERMISSION_GRANTED;
-                    if (permissionToRecord && permissionToStore) {
-                        Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_LONG).show();
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Permission Denied", Toast.LENGTH_LONG).show();
-                    }
-                }
-                break;
+    public void onStop()
+    {
+        super.onStop();
+        if (recorder != null)
+        {
+            recorder.release();
+            recorder = null;
         }
-    }
-
-    public boolean checkPermissions() {
-        // this method is used to check permission
-        int result = ContextCompat.checkSelfPermission(getApplicationContext(), WRITE_EXTERNAL_STORAGE);
-        int result1 = ContextCompat.checkSelfPermission(getApplicationContext(), RECORD_AUDIO);
-        return result == PackageManager.PERMISSION_GRANTED && result1 == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void RequestPermissions() {
-        // this method is used to request the
-        // permission for audio recording and storage.
-        ActivityCompat.requestPermissions(MainActivity.this, new String[]{RECORD_AUDIO, WRITE_EXTERNAL_STORAGE}, REQUEST_AUDIO_PERMISSION_CODE);
     }
 }
