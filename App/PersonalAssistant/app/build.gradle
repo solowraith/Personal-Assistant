@@ -5,9 +5,7 @@ plugins {
 android {
     compileSdk 32
 
-    ant.importBuild 'assets.xml'
-    preBuild.dependsOn(list, checksum)
-    clean.dependsOn(clean_assets)
+
 
     defaultConfig {
         applicationId "com.example.personalassistant"
@@ -46,3 +44,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 }
+
+ant.importBuild 'assets.xml'
+preBuild.dependsOn(list, checksum)
+clean.dependsOn(clean_assets)

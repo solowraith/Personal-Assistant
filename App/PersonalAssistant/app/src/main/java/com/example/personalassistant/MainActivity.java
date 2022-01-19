@@ -11,6 +11,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -24,10 +26,11 @@ public class MainActivity extends AppCompatActivity {
     private static final String LOG_TAG = "AudioRecordTest";
     private MediaRecorder recorder = null;
     private boolean mStartRecording = true;
+    private static voiceProcessing vP;
 
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
-    private final String [] PERMISSIONS = {Manifest.permission.RECORD_AUDIO};
+    private final String [] PERMISSIONS = {Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_EXTERNAL_STORAGE};
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
@@ -51,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private void startRecording()
     {
         recorder = new MediaRecorder();
-        recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        recorder.setAudioSource(MediaRecorder.AudioSource.VOICE_RECOGNITION);
         recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
         recorder.setOutputFile(fileName);
         recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
@@ -124,6 +127,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void toVoiceProcessing(View view)
+    {
+        Intent intent = new Intent(MainActivity.this, voiceProcessing.class);
+        startActivity(intent);
+    }
     @Override
     public void onStop()
     {
