@@ -14,7 +14,7 @@
         android:theme="@style/Theme.PersonalAssistant">
 
         <activity
-            android:name=".voiceProcessing"
+            android:name=".voiceProcessingTEST"
             android:exported="false"
             android:label="voiceProcesssing"
             android:theme="@style/Theme.PersonalAssistant.NoActionBar"/>

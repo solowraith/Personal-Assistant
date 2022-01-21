@@ -32,7 +32,6 @@ package com.example.personalassistant;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -46,10 +45,8 @@ import androidx.core.content.ContextCompat;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 import edu.cmu.pocketsphinx.Assets;
@@ -60,7 +57,7 @@ import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
 import static android.widget.Toast.makeText;
 
-public class voiceProcessing extends Activity implements
+public class voiceProcessingTEST extends Activity implements
         RecognitionListener {
 
     /* Named searches allow to quickly reconfigure the decoder */
@@ -106,8 +103,8 @@ public class voiceProcessing extends Activity implements
     }
 
     private static class SetupTask extends AsyncTask<Void, Void, Exception> {
-        WeakReference<voiceProcessing> activityReference;
-        SetupTask(voiceProcessing activity) {
+        WeakReference<voiceProcessingTEST> activityReference;
+        SetupTask(voiceProcessingTEST activity) {
             this.activityReference = new WeakReference<>(activity);
         }
         @Override

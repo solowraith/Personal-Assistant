@@ -11,12 +11,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
-import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
-
 import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,13 +21,16 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private static String fileName = null;
     private static final String LOG_TAG = "AudioRecordTest";
+    private MediaPlayer RECORDING;
     private MediaRecorder recorder = null;
     private boolean mStartRecording = true;
-    private static voiceProcessing vP;
+    private static voiceProcessingTEST vP;
 
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
     private final String [] PERMISSIONS = {Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_EXTERNAL_STORAGE};
+
+    private VoiceProcessing vp;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
@@ -81,12 +81,14 @@ public class MainActivity extends AppCompatActivity {
         // Record to the external cache directory for visibility
         fileName = getExternalCacheDir().getAbsolutePath();
         fileName += "/userInput.3gp";
+        RECORDING= MediaPlayer.create(MainActivity.this, R.raw.recordingsound);
 
         ActivityCompat.requestPermissions(this, PERMISSIONS, REQUEST_RECORD_AUDIO_PERMISSION);
 
         //Attach button and assign actions
         ImageButton button = findViewById(R.id.imageButton4);
         button.setOnTouchListener(new View.OnTouchListener() {
+
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent)
             {
@@ -94,12 +96,15 @@ public class MainActivity extends AppCompatActivity {
                 {
                     case MotionEvent.ACTION_DOWN:
                         performClick();
-                        onRecord(mStartRecording);
+                        //onRecord(mStartRecording);
                         mStartRecording = !mStartRecording;
+                        vp = new VoiceProcessing(MainActivity.this);
+                        //vp.switchSearch(vp.USR_INPUT);
                         break;
 
                     case MotionEvent.ACTION_UP:
                         onStop();
+                        vp.onEndOfSpeech();
                         break;
 
                     default:
@@ -109,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
             }
             public void performClick()
             {
-                final MediaPlayer RECORDING = MediaPlayer.create(MainActivity.this, R.raw.recordingsound);
                 RECORDING.start();
             }
         });
@@ -129,9 +133,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void toVoiceProcessing(View view)
     {
-        Intent intent = new Intent(MainActivity.this, voiceProcessing.class);
+        Intent intent = new Intent(MainActivity.this, voiceProcessingTEST.class);
         startActivity(intent);
     }
+
     @Override
     public void onStop()
     {
