@@ -1,0 +1,40 @@
+#JSGF V1.0;
+
+grammar custom;
+
+<digit> = oh    |
+          zero  |
+          one   |
+          two   |
+          three |
+          four  |
+          five  |
+          six   |
+          seven |
+          eight |
+          nine  |
+		  ten	|
+		  twenty	|
+		  thirty	|
+		  half	|
+		  forty	|
+		  fifty	|
+		  sixty;
+
+<time_increment> = seconds | minutes | hours;
+
+<time_context> = a. m. | p. m.;
+
+<beginning_for_time> = create | begin | initiate | start | make | set;
+
+<inc_or_dec> = increase | decrease;
+
+<timer> = <beginning_for_time> a timer for <digit> <time_increment>;
+
+<alarm> = <beginning_for_time> an alarm for <digit>+ <time_context>;
+
+<reminder> = <beginning_for_time> a reminder for ;
+
+<brightness> = <inc_or_dec> brightness;
+
+public <search_rule> = <timer> | <alarm> | <reminder> | <brightness>;

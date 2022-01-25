@@ -143,17 +143,14 @@ public class VoiceProcessing extends Activity implements RecognitionListener
 
         recognizer.addListener(this);
 
-        recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
-
-        File menuGrammar = new File(assetsDir, "menu.gram");
-        recognizer.addGrammarSearch(USR_INPUT, menuGrammar);
-
+       //recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
+        File searchGram = new File(assetsDir, "custom.gram");
+        recognizer.addGrammarSearch(USR_INPUT, searchGram);
     }
 
     protected void startListening() {
         recognizer.stop();
 
-        // If we are not spotting, start listening with timeout (10000 ms or 10 seconds).
         recognizer.startListening(USR_INPUT);
     }
 }
