@@ -28,7 +28,7 @@
  * ====================================================================
  */
 
-package com.example.personalassistant;
+package com.example.personalassistant.TestFiles;
 
 import android.Manifest;
 import android.app.Activity;
@@ -56,6 +56,8 @@ import edu.cmu.pocketsphinx.SpeechRecognizer;
 import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
 import static android.widget.Toast.makeText;
+
+import com.example.personalassistant.R;
 
 public class voiceProcessingTEST extends Activity implements
         RecognitionListener {

@@ -1,4 +1,4 @@
-package com.example.personalassistant;
+package com.example.personalassistant.Activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -14,23 +14,28 @@ import android.widget.ImageButton;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
+
+import com.example.personalassistant.R;
+import com.example.personalassistant.Logic.VoiceProcessing;
+import com.example.personalassistant.TestFiles.voiceProcessingTEST;
+
 import java.io.IOException;
 
-public class MainActivity extends AppCompatActivity {
-
+public class MainActivity extends AppCompatActivity
+{
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private static String fileName = null;
     private static final String LOG_TAG = "AudioRecordTest";
-    private MediaPlayer RECORDING;
+    private MediaPlayer RECORDING_SOUND;
     private MediaRecorder recorder = null;
     private boolean mStartRecording = true;
-    private static voiceProcessingTEST vP;
 
     // Requesting permission to RECORD_AUDIO
     private boolean permissionToRecordAccepted = false;
     private final String [] PERMISSIONS = {Manifest.permission.RECORD_AUDIO, Manifest.permission.MANAGE_EXTERNAL_STORAGE};
 
     private VoiceProcessing vp;
+    private String userCommand = null;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
@@ -81,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         // Record to the external cache directory for visibility
         fileName = getExternalCacheDir().getAbsolutePath();
         fileName += "/userInput.3gp";
-        RECORDING= MediaPlayer.create(MainActivity.this, R.raw.recordingsound);
+        RECORDING_SOUND = MediaPlayer.create(MainActivity.this, R.raw.recordingsound);
 
         ActivityCompat.requestPermissions(this, PERMISSIONS, REQUEST_RECORD_AUDIO_PERMISSION);
 
@@ -96,13 +101,13 @@ public class MainActivity extends AppCompatActivity {
                 {
                     case MotionEvent.ACTION_DOWN:
                         performClick();
-                        //onRecord(mStartRecording);
                         mStartRecording = !mStartRecording;
+                        onRecord(mStartRecording);
                         vp = new VoiceProcessing(MainActivity.this);
-                        //vp.switchSearch(vp.USR_INPUT);
                         break;
 
                     case MotionEvent.ACTION_UP:
+                        userCommand = vp.getHyp();
                         onStop();
                         vp.onEndOfSpeech();
                         break;
@@ -114,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
             }
             public void performClick()
             {
-                RECORDING.start();
+                RECORDING_SOUND.start();
             }
         });
     }
@@ -127,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void toManualEntry(View view)
     {
-        Intent intent = new Intent(MainActivity.this, InputSelector.class);
+        Intent intent = new Intent(MainActivity.this, InputSelectorActivity.class);
         startActivity(intent);
     }
 

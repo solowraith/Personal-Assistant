@@ -14,25 +14,25 @@
         android:theme="@style/Theme.PersonalAssistant">
 
         <activity
-            android:name=".voiceProcessingTEST"
+            android:name=".TestFiles.voiceProcessingTEST"
             android:exported="false"
             android:label="voiceProcesssing"
             android:theme="@style/Theme.PersonalAssistant.NoActionBar"/>
 
         <activity
-            android:name=".InformationActivity"
+            android:name=".Activities.InformationActivity"
             android:exported="false"
             android:label="@string/title_activity_information"
             android:theme="@style/Theme.PersonalAssistant.NoActionBar" />
 
         <activity
-            android:name=".InputSelector"
+            android:name=".Activities.InputSelectorActivity"
             android:exported="false"
             android:label="@string/title_Input_Selector"
             android:theme="@style/Theme.PersonalAssistant.NoActionBar" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".Activities.MainActivity"
             android:exported="true">
 
             <intent-filter>

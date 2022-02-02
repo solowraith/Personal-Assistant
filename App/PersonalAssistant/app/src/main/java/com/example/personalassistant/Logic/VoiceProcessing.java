@@ -1,9 +1,8 @@
-package com.example.personalassistant;
+package com.example.personalassistant.Logic;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.Bundle;
 
 import android.os.Environment;
 import android.widget.TextView;
@@ -22,18 +21,20 @@ import edu.cmu.pocketsphinx.SpeechRecognizerSetup;
 
 import static android.widget.Toast.makeText;
 
+import com.example.personalassistant.Activities.MainActivity;
+import com.example.personalassistant.R;
+
 public class VoiceProcessing extends Activity implements RecognitionListener
 {
-    private static final String KEYPHRASE = "listen";
-    protected static final String KWS_SEARCH = "wakeup";
-    protected static final String USR_INPUT = "active listening";
-    private Context reference;
+    private static final String USR_INPUT = "User Commands";
+    private final Context REFERENCE;
 
-    protected SpeechRecognizer recognizer;
+    private String hyp = null;
+    private SpeechRecognizer recognizer;
 
     public VoiceProcessing(MainActivity activity)
     {
-        reference = activity.getApplicationContext();
+        REFERENCE = activity.getApplicationContext();
         new SetupTask(activity).execute();
     }
 
@@ -89,10 +90,10 @@ public class VoiceProcessing extends Activity implements RecognitionListener
     @Override
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
-            String text = hypothesis.getHypstr();
-            makeText(reference, text, Toast.LENGTH_SHORT).show();
+            hyp = hypothesis.getHypstr();
+            makeText(REFERENCE, hyp, Toast.LENGTH_SHORT).show();
 
-            writeFileExternalStorage(text);
+            writeFileExternalStorage(hyp);
         }
     }
 
@@ -109,27 +110,42 @@ public class VoiceProcessing extends Activity implements RecognitionListener
         //Checking the availability state of the External Storage.
         String state = Environment.getExternalStorageState();
         if (!Environment.MEDIA_MOUNTED.equals(state)) {
-
             //If it isn't mounted - we can't write into it.
             return;
         }
 
         //Create a new file that points to the root directory, with the given name:
-        File file = new File(reference.getExternalFilesDir(null), "output.txt");
+        File voiceLog = new File(REFERENCE.getExternalFilesDir(null), "voiceLog.txt");
+        File lastCommand = new File(REFERENCE.getExternalFilesDir(null), "prevCommand.txt");
 
         //This point and below is responsible for the write operation
-        FileOutputStream outputStream = null;
+        FileOutputStream outputStream;
         try {
-            file.createNewFile();
-            //second argument of FileOutputStream constructor indicates whether
-            //to append or create new file if one exists
-            outputStream = new FileOutputStream(file, true);
+            if(voiceLog.createNewFile())
+            {
+                //Writing to file that stores a log of all commands issued to the assistant
+                outputStream = new FileOutputStream(voiceLog, true);
+                outputStream.write(textToWrite.getBytes());
+                outputStream.write("\n".getBytes());
+                outputStream.flush();
+                outputStream.close();
+            }
+            else
+                makeText(REFERENCE, "Couldn't write to voiceLog.txt", Toast.LENGTH_SHORT).show();
 
-            outputStream.write(textToWrite.getBytes());
-            outputStream.write("\n".getBytes());
-            outputStream.flush();
-            outputStream.close();
-        } catch (Exception e) {
+            if(lastCommand.createNewFile())
+            {
+                //Writing to file only the previous command issued to the assistant
+                outputStream = new FileOutputStream(lastCommand, false);
+                outputStream.write(textToWrite.getBytes());
+                outputStream.flush();
+                outputStream.close();
+            }
+            else
+                makeText(REFERENCE, "Couldn't write to lastCommand.txt", Toast.LENGTH_SHORT).show();
+        }
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
     }
@@ -148,7 +164,13 @@ public class VoiceProcessing extends Activity implements RecognitionListener
         recognizer.addGrammarSearch(USR_INPUT, searchGram);
     }
 
-    protected void startListening() {
+    //Returns the hypothesis, can only be called after onResult
+    public String getHyp()
+    {
+        return hyp;
+    }
+
+    private void startListening() {
         recognizer.stop();
 
         recognizer.startListening(USR_INPUT);
