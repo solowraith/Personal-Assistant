@@ -1,8 +1,13 @@
 package com.example.personalassistant.Logic;
 
+
+import android.view.WindowManager;
+
+import java.util.HashMap;
+
 public class ActionTemplate
 {
-    private final String[] CHOSEN_ACTION = new String[4];
+    private final Action ACTION = new Action();
     // Array layout: [Action, time, date, data]
 
     public void setAction(String action, String[] brokenUserCommands)
@@ -10,46 +15,84 @@ public class ActionTemplate
         switch (action)
         {
             case "alarm":
-                CHOSEN_ACTION[0] = brokenUserCommands[2];
-                CHOSEN_ACTION[1] = brokenUserCommands[4] + ":" + brokenUserCommands[5];
-                CHOSEN_ACTION[2] = null;
-                CHOSEN_ACTION[3] = brokenUserCommands[6];
+                ACTION.action = brokenUserCommands[2];
+                ACTION.time = ACTION.stringToNum(brokenUserCommands[4]) + ":" + ACTION.stringToNum(brokenUserCommands[5]);
+                ACTION.colonIndex = ACTION.time.indexOf(':');
+                ACTION.data = brokenUserCommands[6];
                 break;
 
             case "timer":
-                CHOSEN_ACTION[0] = brokenUserCommands[2];
-                CHOSEN_ACTION[1] = brokenUserCommands[4];
-                CHOSEN_ACTION[2] = null;
-                CHOSEN_ACTION[3] = brokenUserCommands[5];
+                ACTION.action = brokenUserCommands[2];
+                ACTION.time = "" + ACTION.stringToNum(brokenUserCommands[4]);
+                ACTION.data = brokenUserCommands[5];
                 break;
 
             case "reminder":
-                CHOSEN_ACTION[0] = brokenUserCommands[2];
-                CHOSEN_ACTION[1] = "";
-                CHOSEN_ACTION[2] = "";
-                CHOSEN_ACTION[3] = "";
+                ACTION.action = brokenUserCommands[2];
+                ACTION.time =  "";
+                ACTION.date = "";
+                ACTION.data = "";
                 break;
 
             case "increase":
-                CHOSEN_ACTION[0] = brokenUserCommands[0];
-                CHOSEN_ACTION[1] = null;
-                CHOSEN_ACTION[2] = null;
-                CHOSEN_ACTION[3] = "5";
+                ACTION.action = brokenUserCommands[0];
+                ACTION.data = "5";
                 break;
 
             case "decrease":
-                CHOSEN_ACTION[0] = brokenUserCommands[0];
-                CHOSEN_ACTION[1] = "";
-                CHOSEN_ACTION[2] = "";
-                CHOSEN_ACTION[3] = "-5";
+                ACTION.action = brokenUserCommands[0];
+                ACTION.data = "-5";
+                break;
+
+            default:
                 break;
         }
 
     }
 
-    public String[] getAction()
+    public Action getAction()
     {
-        return CHOSEN_ACTION;
+        return ACTION;
+    }
+}
+
+class Action
+{
+    String action = "";
+    String time = "";
+    int colonIndex;
+    String date = "";
+    String data = "";
+
+    protected int stringToNum(String string)
+    {
+        int num;
+        HashMap<String, Integer> map = new HashMap<String, Integer>();
+
+        String[] values = {"zero","one","two","three","four","five","six","seven",
+                "eight","nine","ten","twenty","thirty","half","forty","fifty","sixty","oh", "o'clock"};
+
+        for(int i = 0; i < 11; i++)
+        {
+            map.put(values[i], i);
+        }
+
+        map.put(values[11], 20);
+        map.put(values[12], 30);
+        map.put(values[13], 30);
+        map.put(values[14], 40);
+        map.put(values[15], 50);
+        map.put(values[16], 60);
+        map.put(values[17], 0);
+        map.put(values[18], 0);
+
+        num = map.get(string).intValue();
+
+        return num;
     }
 
+    protected void dumpParams()
+    {
+        System.out.printf("%naction:%s%ntime:%s%ndate:%s%ndata:%s%n",action,time,date,data);
+    }
 }

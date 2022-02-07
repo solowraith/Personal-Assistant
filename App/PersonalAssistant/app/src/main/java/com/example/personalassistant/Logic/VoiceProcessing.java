@@ -91,9 +91,9 @@ public class VoiceProcessing extends Activity implements RecognitionListener
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null) {
             hyp = hypothesis.getHypstr();
-            makeText(REFERENCE, hyp, Toast.LENGTH_SHORT).show();
+            //makeText(REFERENCE, hyp, Toast.LENGTH_SHORT).show();
 
-            writeFileExternalStorage(hyp);
+            writeFileExternalStorage(hypothesis.getHypstr());
         }
     }
 
@@ -121,7 +121,7 @@ public class VoiceProcessing extends Activity implements RecognitionListener
         //This point and below is responsible for the write operation
         FileOutputStream outputStream;
         try {
-            if(voiceLog.createNewFile())
+            if(voiceLog.createNewFile() || voiceLog.isFile())
             {
                 //Writing to file that stores a log of all commands issued to the assistant
                 outputStream = new FileOutputStream(voiceLog, true);
@@ -133,7 +133,7 @@ public class VoiceProcessing extends Activity implements RecognitionListener
             else
                 makeText(REFERENCE, "Couldn't write to voiceLog.txt", Toast.LENGTH_SHORT).show();
 
-            if(lastCommand.createNewFile())
+            if(lastCommand.createNewFile() || lastCommand.isFile())
             {
                 //Writing to file only the previous command issued to the assistant
                 outputStream = new FileOutputStream(lastCommand, false);
@@ -142,7 +142,7 @@ public class VoiceProcessing extends Activity implements RecognitionListener
                 outputStream.close();
             }
             else
-                makeText(REFERENCE, "Couldn't write to lastCommand.txt", Toast.LENGTH_SHORT).show();
+                makeText(REFERENCE, "Couldn't write to prevCommand.txt", Toast.LENGTH_SHORT).show();
         }
         catch (Exception e)
         {
