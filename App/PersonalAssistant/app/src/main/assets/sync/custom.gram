@@ -2,24 +2,65 @@
 
 grammar custom;
 
-<digit> = oh    |
-          zero  |
-          one   |
-          two   |
-          three |
-          four  |
-          five  |
-          six   |
-          seven |
-          eight |
-          nine  |
-		  ten	|
+<month> = january 	|
+		  february 	|
+		  march		|
+		  april		|
+		  may		|
+		  june		|
+		  july		|
+		  august	|
+		  september	|
+		  october	|
+		  november	|
+		  december;
+		  
+<day> =   first			|
+		  second		|
+		  third			|
+		  fourth		|
+		  fifth			|
+		  sixth			|
+		  seventh		|
+		  eighth		|
+		  ninth			|
+		  tenth			|
+		  eleventh		|
+		  twelfth		|
+		  thirteenth	|
+		  fourteenth	|
+		  fifteenth		|
+		  sixteenth		|
+		  seventeenth	|
+		  eighteenth	|
+		  nineteenth	|
+		  twentieth		|
+		  twenty		|
+		  thirtieth		|
+		  thiry;
+
+<digit> = oh    	|
+          zero  	|
+          one   	|
+          two   	|
+          three 	|
+          four  	|
+          five  	|
+          six   	|
+          seven 	|
+          eight 	|
+          nine  	|
+		  ten		|
 		  twenty	|
 		  thirty	|
-		  half	|
-		  forty	|
-		  fifty	|
-		  sixty;
+		  half		|
+		  forty		|
+		  fifty		|
+		  sixty		|
+		  seventy	|
+		  eighty	|
+		  ninety	|
+		  hundred;
 
 <time_increment> = minutes | hours;
 
@@ -27,14 +68,16 @@ grammar custom;
 
 <beginning_for_time> = create | begin | initiate | start | make | set;
 
+<declaration> = for | at | on;
+
 <inc_or_dec> = increase | decrease;
 
-<timer> = <beginning_for_time> a timer for <digit> <time_increment>;
+<timer> = <beginning_for_time> a timer <declaration> <digit> <time_increment>;
 
-<alarm> = <beginning_for_time> an alarm for <digit> (<digit>| o'clock) <time_context>;
+<alarm> = <beginning_for_time> an alarm <declaration> <digit> (<digit>| o'clock)* <time_context>;
 
-<reminder> = <beginning_for_time> a reminder for ;
+<reminder> = <beginning_for_time> a reminder <declaration> <month> <day>+;
 
-<brightness> = <inc_or_dec> brightness;
+<brightness> = <inc_or_dec> brightness by <digit>+ percent;
 
 public <search_rule> = <timer> | <alarm> | <reminder> | <brightness>;

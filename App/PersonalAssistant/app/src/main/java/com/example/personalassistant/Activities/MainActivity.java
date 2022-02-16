@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity
 
     private VoiceProcessing vp;
     private String userCommand = null;
+    PackageManager pm;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
@@ -92,6 +93,7 @@ public class MainActivity extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        pm = this.getPackageManager();
 
         // Record to the external cache directory for visibility
         fileName = getExternalCacheDir().getAbsolutePath();
@@ -102,8 +104,8 @@ public class MainActivity extends AppCompatActivity
 
         //Attach button and assign actions
         ImageButton button = findViewById(R.id.imageButton4);
-        button.setOnTouchListener(new View.OnTouchListener() {
-
+        button.setOnTouchListener(new View.OnTouchListener()
+        {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent)
             {
@@ -118,22 +120,27 @@ public class MainActivity extends AppCompatActivity
 
                     case MotionEvent.ACTION_UP:
                         onStop();
-
-                        try {
-                            //Thread.sleep(3000);
+                        try
+                        {
+                            int reps = 0;
+                            while(!vp.getStatus())
+                            {
+                                Thread.sleep(10);
+                                reps++;
+                                if(reps >= 300)
+                                    Log.e("personalAssistant", "vp.getStatus() took too long to update");
+                                    break;
+                            }
                             FileInputStream input = new FileInputStream(MainActivity.this.getExternalFilesDir(null) + "/prevCommand.txt");
                             Scanner scanner = new Scanner(input);
 
                             String userCommand = scanner.nextLine();
                             TextParser parser = new TextParser(userCommand, view.getContext());
-                            Intent intent = parser.getIntent();
+                            launchIntent(parser.getIntent());
 
-                            launchIntent(intent);
-
-                        } catch (FileNotFoundException e) {
+                        } catch (FileNotFoundException | InterruptedException e) {
                             e.printStackTrace();
                         }
-
                         break;
 
                     default:
@@ -150,17 +157,18 @@ public class MainActivity extends AppCompatActivity
 
     public void launchIntent(Intent intent)
     {
-        startActivity(intent);
 
-        /*
-        if(intent.resolveActivity(getPackageManager()) != null)
-            startActivity(intent);
-        else
+        if(intent != null)
         {
-            System.err.printf("%naction:%s %ndata:%s", intent.getAction(), intent.getDataString());
-            makeText(MainActivity.this, "Couldn't begin intent", Toast.LENGTH_LONG).show();
+            if (intent.resolveActivity(getPackageManager()) != null)
+                startActivity(intent);
+            else {
+                System.err.printf("%naction:%s %ndata:%s", intent.getAction(), intent.getDataString());
+                makeText(MainActivity.this, "Couldn't begin intent", Toast.LENGTH_LONG).show();
+            }
         }
-        */
+        else
+            makeText(MainActivity.this,"Error creating intent", Toast.LENGTH_LONG).show();
     }
 
     public void forInformation()

@@ -3,7 +3,9 @@ package com.example.personalassistant.Logic;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.AlarmClock;
+import android.provider.CalendarContract;
 import android.widget.Toast;
+import android.provider.Settings;
 import static android.widget.Toast.makeText;
 
 public class TextParser
@@ -58,9 +60,30 @@ public class TextParser
         }
 
         ActionTemplate template = new ActionTemplate();
-        template.setAction(decipheredAction, brokenString);
 
-        return template;
+        switch(template.setAction(decipheredAction, brokenString))
+        {
+            case -1:
+                makeText(context, "Alarm hour out of bounds", Toast.LENGTH_LONG).show();
+                return null;
+            case -2:
+                makeText(context, "Alarm minute out of bounds", Toast.LENGTH_LONG).show();
+                return null;
+            case -3:
+                makeText(context, "Reminder day out of bounds", Toast.LENGTH_LONG).show();
+                return null;
+            case -4:
+                makeText(context, "Reminder month out of bounds", Toast.LENGTH_LONG).show();
+                return null;
+            case -5:
+                makeText(context, "Could not parse date", Toast.LENGTH_LONG).show();
+                return null;
+            case -10:
+                makeText(context, "Parsing error in Action Log", Toast.LENGTH_LONG).show();
+                return null;
+            default:
+                return template;
+        }
     }
 
     private String[] breakString(String input)
@@ -75,8 +98,11 @@ public class TextParser
                 temp += character;
             else
             {
-                brokenString[count++] = temp;
-                temp = "";
+                if(count < brokenString.length)
+                {
+                    brokenString[count++] = temp;
+                    temp = "";
+                }
             }
         }
         brokenString[count] = temp;
@@ -101,7 +127,7 @@ public class TextParser
 
             case "timer":
                 intent = new Intent(AlarmClock.ACTION_SET_TIMER);
-                intent.putExtra(AlarmClock.EXTRA_SKIP_UI, true);
+                intent.putExtra(AlarmClock.EXTRA_SKIP_UI, false);
 
                 switch(actionable.getAction().data)
                 {
@@ -120,9 +146,15 @@ public class TextParser
                 break;
 
             case "reminder":
+                intent = new Intent(Intent.ACTION_INSERT);
+                intent.setData(CalendarContract.Events.CONTENT_URI);
+                intent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, actionable.getAction().date.getTime());
+                intent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, actionable.getAction().date.getTime() + 86400001);
+                intent.putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, true);
                 break;
 
             case "increase":
+                //Settings.System.putInt(context, Settings.System.SCREEN_BRIGHTNESS, Integer.parseInt(Settings.System.SCREEN_BRIGHTNESS) * (Integer.parseInt(actionable.getAction().data)/100));
                 break;
 
             case "decrease":

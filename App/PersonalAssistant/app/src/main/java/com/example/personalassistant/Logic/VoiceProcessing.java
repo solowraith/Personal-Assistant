@@ -29,7 +29,7 @@ public class VoiceProcessing extends Activity implements RecognitionListener
     private static final String USR_INPUT = "User Commands";
     private final Context REFERENCE;
 
-    private String hyp = null;
+    private boolean isDone = false;
     private SpeechRecognizer recognizer;
 
     public VoiceProcessing(MainActivity activity)
@@ -59,9 +59,9 @@ public class VoiceProcessing extends Activity implements RecognitionListener
 
         @Override
         protected void onPostExecute(Exception result) {
-            if (result != null) {
-                ((TextView) activityReference.get().findViewById(R.id.caption_text))
-                        .setText("Failed to init recognizer " + result);
+            if (result != null)
+            {
+                makeText(REFERENCE, "Failed to init recognizer " + result, Toast.LENGTH_LONG).show();
             }
             startListening();
         }
@@ -89,11 +89,10 @@ public class VoiceProcessing extends Activity implements RecognitionListener
 
     @Override
     public void onResult(Hypothesis hypothesis) {
-        if (hypothesis != null) {
-            hyp = hypothesis.getHypstr();
-            //makeText(REFERENCE, hyp, Toast.LENGTH_SHORT).show();
-
+        if (hypothesis != null)
+        {
             writeFileExternalStorage(hypothesis.getHypstr());
+            isDone = true;
         }
     }
 
@@ -101,6 +100,7 @@ public class VoiceProcessing extends Activity implements RecognitionListener
     public void onError(Exception e)
     {
         makeText(getApplicationContext(), "Failed to use Voice Recognition", Toast.LENGTH_SHORT).show();
+        e.printStackTrace();
     }
 
     @Override
@@ -164,15 +164,14 @@ public class VoiceProcessing extends Activity implements RecognitionListener
         recognizer.addGrammarSearch(USR_INPUT, searchGram);
     }
 
-    //Returns the hypothesis, can only be called after onResult
-    public String getHyp()
-    {
-        return hyp;
-    }
-
     private void startListening() {
         recognizer.stop();
 
         recognizer.startListening(USR_INPUT);
+    }
+
+    public boolean getStatus()
+    {
+        return isDone;
     }
 }
