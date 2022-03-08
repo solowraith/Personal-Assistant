@@ -87,22 +87,11 @@ public class ActionTemplate
                 ACTION.data = "";
                 break;
 
-            case "increase":
-                ACTION.action = brokenUserCommands[0];
-
-                int increment = ACTION.stringToNum(brokenUserCommands[3]);
-                if(ACTION.stringToNum(brokenUserCommands[4]) == 100)
-                    increment = 100;
-                ACTION.data = "" + increment;
-                break;
-
-            case "decrease":
-                ACTION.action = brokenUserCommands[0];
-
-                int decrement = ACTION.stringToNum(brokenUserCommands[3]);
-                if(ACTION.stringToNum(brokenUserCommands[4]) == 100)
-                    decrement = 100;
-                ACTION.data = "-" + decrement;
+            case "brightness":
+                ACTION.action = brokenUserCommands[1];
+                int newBrightness = ACTION.stringToNum(brokenUserCommands[3]) +
+                        ACTION.stringToNum(brokenUserCommands[4]);
+                ACTION.data = "" + newBrightness;
                 break;
 
             default:
@@ -156,7 +145,11 @@ class Action
         timerMap.put(timerValues[21], 90);
         timerMap.put(timerValues[22], 100);
 
+        System.err.println("String used: " + string);
 
+        if(timerMap.get(string) == null)
+            return 0;
+        else
         num = timerMap.get(string).intValue();
 
         return num;

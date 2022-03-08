@@ -27,13 +27,15 @@ import com.example.personalassistant.R;
 public class VoiceProcessing extends Activity implements RecognitionListener
 {
     private static final String USR_INPUT = "User Commands";
+    private static final String FF_SPEECH = "Freeform Speech";
     private final Context REFERENCE;
 
-    private boolean isDone = false;
+    private boolean isDone;
     private SpeechRecognizer recognizer;
 
     public VoiceProcessing(MainActivity activity)
     {
+        isDone = false;
         REFERENCE = activity.getApplicationContext();
         new SetupTask(activity).execute();
     }
@@ -61,9 +63,10 @@ public class VoiceProcessing extends Activity implements RecognitionListener
         protected void onPostExecute(Exception result) {
             if (result != null)
             {
-                makeText(REFERENCE, "Failed to init recognizer " + result, Toast.LENGTH_LONG).show();
+                makeText(REFERENCE, "Failed to init recognizer ", Toast.LENGTH_LONG).show();
+                result.printStackTrace();
             }
-            startListening();
+            makeText(REFERENCE, "Recognizer ready to recieve input", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -76,12 +79,6 @@ public class VoiceProcessing extends Activity implements RecognitionListener
     public void onEndOfSpeech()
     {
         recognizer.stop();
-
-        if (recognizer != null)
-        {
-            recognizer.cancel();
-            recognizer.shutdown();
-        }
     }
 
     @Override
@@ -90,10 +87,10 @@ public class VoiceProcessing extends Activity implements RecognitionListener
     @Override
     public void onResult(Hypothesis hypothesis) {
         if (hypothesis != null)
-        {
             writeFileExternalStorage(hypothesis.getHypstr());
-            isDone = true;
-        }
+
+        makeText(REFERENCE, hypothesis.getHypstr(), Toast.LENGTH_LONG).show();
+        System.out.println(hypothesis.getHypstr());
     }
 
     @Override
@@ -148,6 +145,8 @@ public class VoiceProcessing extends Activity implements RecognitionListener
         {
             e.printStackTrace();
         }
+
+        isDone = true;
     }
 
     private void setupRecognizer(File assetsDir) throws IOException
@@ -161,17 +160,28 @@ public class VoiceProcessing extends Activity implements RecognitionListener
 
        //recognizer.addKeyphraseSearch(KWS_SEARCH, KEYPHRASE);
         File searchGram = new File(assetsDir, "custom.gram");
+        File languageModel = new File(assetsDir, "en-70k-0.2-pruned.lm");
+
         recognizer.addGrammarSearch(USR_INPUT, searchGram);
+        recognizer.addNgramSearch(FF_SPEECH, languageModel);
     }
 
-    private void startListening() {
+    public void startListening(boolean ffSearch) {
         recognizer.stop();
 
-        recognizer.startListening(USR_INPUT);
+        if(!ffSearch)
+            recognizer.startListening(USR_INPUT);
+        else
+            recognizer.startListening(FF_SPEECH, 5000);
     }
 
     public boolean getStatus()
     {
         return isDone;
+    }
+
+    public void resetStatus()
+    {
+        isDone = false;
     }
 }

@@ -6,17 +6,23 @@ import android.provider.AlarmClock;
 import android.provider.CalendarContract;
 import android.widget.Toast;
 import android.provider.Settings;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+
 import static android.widget.Toast.makeText;
 
-public class TextParser
+import java.util.Date;
+
+public class TextParser extends AppCompatActivity
 {
-    ActionTemplate template;
-    Context context;
-    Intent intent;
+    private ActionTemplate template;
+    private final Context REFERENCE;
+    private Intent intent;
 
     public TextParser(String userCommand, Context context)
     {
-        this.context = context;
+        REFERENCE = context;
 
         if(userCommand != null)
         {
@@ -25,10 +31,10 @@ public class TextParser
             if(template.getAction().action != null)
                 this.intent = intentBuilder(template);
             else
-                makeText(context, "Couldn't resolve Template", Toast.LENGTH_SHORT).show();
+                makeText(REFERENCE, "Couldn't resolve Template", Toast.LENGTH_SHORT).show();
         }
         else
-            makeText(context, "Couldn't resolve input", Toast.LENGTH_SHORT).show();
+            makeText(REFERENCE, "Couldn't resolve input", Toast.LENGTH_SHORT).show();
     }
 
     private ActionTemplate classifyString(String userCommand)
@@ -36,11 +42,10 @@ public class TextParser
         String[] brokenString = breakString(userCommand);
         String decipheredAction;
 
-        switch(brokenString[0])
+        switch(brokenString[1])
         {
-            case "increase":
-            case "decrease":
-                decipheredAction = brokenString[0];
+            case "brightness":
+                decipheredAction = brokenString[1];
                 break;
 
             default:
@@ -53,7 +58,7 @@ public class TextParser
                         break;
 
                     default:
-                        makeText(context, "Couldn't parse input", Toast.LENGTH_LONG).show();
+                        makeText(REFERENCE, "Couldn't parse input", Toast.LENGTH_LONG).show();
                         decipheredAction = "N/A";
                         break;
                 }
@@ -64,22 +69,22 @@ public class TextParser
         switch(template.setAction(decipheredAction, brokenString))
         {
             case -1:
-                makeText(context, "Alarm hour out of bounds", Toast.LENGTH_LONG).show();
+                makeText(REFERENCE, "Alarm hour out of bounds", Toast.LENGTH_LONG).show();
                 return null;
             case -2:
-                makeText(context, "Alarm minute out of bounds", Toast.LENGTH_LONG).show();
+                makeText(REFERENCE, "Alarm minute out of bounds", Toast.LENGTH_LONG).show();
                 return null;
             case -3:
-                makeText(context, "Reminder day out of bounds", Toast.LENGTH_LONG).show();
+                makeText(REFERENCE, "Reminder day out of bounds", Toast.LENGTH_LONG).show();
                 return null;
             case -4:
-                makeText(context, "Reminder month out of bounds", Toast.LENGTH_LONG).show();
+                makeText(REFERENCE, "Reminder month out of bounds", Toast.LENGTH_LONG).show();
                 return null;
             case -5:
-                makeText(context, "Could not parse date", Toast.LENGTH_LONG).show();
+                makeText(REFERENCE, "Could not parse date", Toast.LENGTH_LONG).show();
                 return null;
             case -10:
-                makeText(context, "Parsing error in Action Log", Toast.LENGTH_LONG).show();
+                makeText(REFERENCE, "Parsing error in Action Log", Toast.LENGTH_LONG).show();
                 return null;
             default:
                 return template;
@@ -139,29 +144,40 @@ public class TextParser
                         intent.putExtra(AlarmClock.EXTRA_LENGTH, (Integer.parseInt(actionable.getAction().time) * 60));
                         break;
 
-                    default:
+                    case "seconds":
+                        intent.putExtra(AlarmClock.EXTRA_LENGTH, Integer.parseInt(actionable.getAction().time));
                         break;
                 }
-
                 break;
 
             case "reminder":
+                long addOn = 0;
+                int nextDay = 86400001;
+                Date current = new Date();
+
+                if(actionable.getAction().date.getTime() < current.getTime())
+                    addOn = 31556952000L;
+
                 intent = new Intent(Intent.ACTION_INSERT);
                 intent.setData(CalendarContract.Events.CONTENT_URI);
-                intent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, actionable.getAction().date.getTime());
-                intent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, actionable.getAction().date.getTime() + 86400001);
+                intent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, actionable.getAction().date.getTime() + addOn);
+                intent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, actionable.getAction().date.getTime() + nextDay + addOn);
                 intent.putExtra(CalendarContract.EXTRA_EVENT_ALL_DAY, true);
                 break;
 
-            case "increase":
-                //Settings.System.putInt(context, Settings.System.SCREEN_BRIGHTNESS, Integer.parseInt(Settings.System.SCREEN_BRIGHTNESS) * (Integer.parseInt(actionable.getAction().data)/100));
-                break;
+            case "brightness":
+                final float maxBrightness = 255;
+                float newBrightness = maxBrightness * ((float) Integer.parseInt(actionable.getAction().data) / 100f);
 
-            case "decrease":
+                Settings.System.putInt(REFERENCE.getContentResolver(),
+                        Settings.System.SCREEN_BRIGHTNESS_MODE, Settings.System.SCREEN_BRIGHTNESS_MODE_MANUAL);
+
+                Settings.System.putInt(REFERENCE.getContentResolver(), Settings.System.SCREEN_BRIGHTNESS,
+                        (int) newBrightness);
                 break;
 
             default:
-                makeText(context, "Couldn't build intent, input not recognized", Toast.LENGTH_SHORT).show();
+                makeText(REFERENCE, "Couldn't build intent, input not recognized", Toast.LENGTH_SHORT).show();
                 break;
         }
 
@@ -171,5 +187,10 @@ public class TextParser
     public Intent getIntent()
     {
         return intent;
+    }
+
+    public String getAction()
+    {
+        return template.getAction().action;
     }
 }

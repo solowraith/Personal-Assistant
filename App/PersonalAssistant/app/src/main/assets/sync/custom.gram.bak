@@ -62,7 +62,7 @@ grammar custom;
 		  ninety	|
 		  hundred;
 
-<time_increment> = minutes | hours;
+<time_increment> = minutes | hours | seconds;
 
 <time_context> = a. m. | p. m.;
 
@@ -78,6 +78,6 @@ grammar custom;
 
 <reminder> = <beginning_for_time> a reminder <declaration> <month> <day>+;
 
-<brightness> = <inc_or_dec> brightness by <digit>+ percent;
+<brightness> = set brightness to (<digit> | (<digit> <digit>)) percent;
 
 public <search_rule> = <timer> | <alarm> | <reminder> | <brightness>;

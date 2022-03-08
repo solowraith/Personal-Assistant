@@ -47,6 +47,20 @@
         tools:srcCompat="@android:drawable/ic_btn_speak_now" />
 
     <ImageButton
+        android:id="@+id/imageButton"
+        style="@style/Widget.AppCompat.ImageButton"
+        android:layout_width="109dp"
+        android:layout_height="88dp"
+        android:layout_marginBottom="428dp"
+        android:background="@drawable/roundedbutton"
+        android:backgroundTint="#F44336"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@android:drawable/ic_btn_speak_now"
+        tools:srcCompat="@android:drawable/ic_btn_speak_now" />
+
+    <ImageButton
         android:id="@+id/imageButton5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
