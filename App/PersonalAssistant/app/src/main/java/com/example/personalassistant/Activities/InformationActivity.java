@@ -1,4 +1,5 @@
 package com.example.personalassistant.Activities;
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
@@ -16,6 +17,7 @@ public class InformationActivity extends AppCompatActivity
 
     public void toMain(View view)
     {
-        onBackPressed();
+        startActivity(new Intent(InformationActivity.this, MainActivity.class));
+        //Returns to mainActivity
     }
 }

@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/input_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorSecondary"
@@ -9,7 +10,7 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:theme="@style/Theme.PersonalAssistant.AppBarOverlay"
         app:layout_constraintEnd_toEndOf="parent"
@@ -28,104 +29,76 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <Button
-        android:id="@+id/button4"
+        android:id="@+id/setAlarm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="56dp"
-        android:layout_marginTop="76dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
         android:backgroundTint="@color/colorPrimary"
         android:text="@string/alarm"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button3" />
+        app:layout_constraintEnd_toEndOf="@+id/setReminder"
+        app:layout_constraintStart_toStartOf="@+id/setReminder"
+        app:layout_constraintTop_toBottomOf="@+id/setReminder" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/setReminder"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="56dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
         android:backgroundTint="@color/colorPrimary"
         android:text="@string/reminder"
-        app:layout_constraintBottom_toTopOf="@+id/button5"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appBarLayout"
-        app:layout_constraintVertical_bias="1.0" />
-
-    <Button
-        android:id="@+id/button5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
-        android:layout_marginEnd="56dp"
-        android:backgroundTint="@color/colorPrimary"
-        android:text="@string/timer"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/appBarLayout" />
 
     <Button
-        android:id="@+id/button6"
+        android:id="@+id/setTimer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="76dp"
-        android:layout_marginEnd="56dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
         android:backgroundTint="@color/colorPrimary"
-        android:text="@string/open_app"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button5" />
+        android:text="@string/timer"
+        app:layout_constraintEnd_toEndOf="@+id/setAlarm"
+        app:layout_constraintStart_toStartOf="@+id/setAlarm"
+        app:layout_constraintTop_toBottomOf="@+id/setAlarm" />
 
     <Button
-        android:id="@+id/button7"
+        android:id="@+id/setAssName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="56dp"
-        android:layout_marginTop="76dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
         android:backgroundTint="@color/colorPrimary"
         android:text="@string/set_assistant"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button4" />
+        app:layout_constraintEnd_toEndOf="@+id/setTimer"
+        app:layout_constraintStart_toStartOf="@+id/setTimer"
+        app:layout_constraintTop_toBottomOf="@+id/setTimer" />
 
     <Button
-        android:id="@+id/button8"
+        android:id="@+id/setUsrName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="76dp"
-        android:layout_marginEnd="56dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
         android:backgroundTint="@color/colorPrimary"
         android:text="@string/set_user"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button6" />
+        app:layout_constraintEnd_toEndOf="@+id/setAssName"
+        app:layout_constraintStart_toStartOf="@+id/setAssName"
+        app:layout_constraintTop_toBottomOf="@+id/setAssName" />
 
     <Button
-        android:id="@+id/button9"
+        android:id="@+id/prevButt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="56dp"
-        android:layout_marginTop="76dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="40dp"
         android:backgroundTint="@color/colorPrimary"
-        android:text="@string/inc_brightness"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button7" />
-
-    <Button
-        android:id="@+id/button10"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="76dp"
-        android:layout_marginEnd="56dp"
-        android:backgroundTint="@color/colorPrimary"
-        android:text="@string/dec_brightness"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button8" />
-
-    <Button
-        android:id="@+id/button11"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/colorPrimary"
-        android:text="@string/previous"
         android:onClick="toMain"
+        android:text="@string/previous"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button9" />
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,14 +3,9 @@ package com.example.personalassistant.Logic;
 
 import android.util.Log;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.PrintWriter;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 
@@ -19,6 +14,10 @@ public class ActionTemplate
     private final Action ACTION = new Action();
     // Array layout: [Action, time, date, data]
 
+    /*
+    Initializes the Action object, using the classified action from TextParser.classifyString
+    to determine the proper placement for the required information within the user's command
+     */
     public int setAction(String action, String[] brokenUserCommands)
     {
         switch (action)
@@ -37,6 +36,7 @@ public class ActionTemplate
                     return -2;
                 }
 
+                //Filling the Action object's fields directly from the user's commands
                 ACTION.action = brokenUserCommands[2];
                 ACTION.time = ACTION.stringToNum(brokenUserCommands[4]) + ":" + ACTION.stringToNum(brokenUserCommands[5]);
                 ACTION.colonIndex = ACTION.time.indexOf(':');
@@ -44,6 +44,7 @@ public class ActionTemplate
                 break;
 
             case "timer":
+                //Filling the Action object's fields directly from the user's commands
                 ACTION.action = brokenUserCommands[2];
                 ACTION.time = "" + ACTION.stringToNum(brokenUserCommands[4]);
                 ACTION.data = brokenUserCommands[5];
@@ -66,6 +67,8 @@ public class ActionTemplate
                     return -4;
                 }
 
+                //Using Java's date formater, transforms the user's commands into a format that will
+                //later be able to be understood by intentBuilder() as a proper date form.
                 String pattern = "dd-MM-yyyy";
                 SimpleDateFormat format = new SimpleDateFormat(pattern);
                 String stringDate = (ACTION.dateToNum(brokenUserCommands[5]) + ACTION.dateToNum(brokenUserCommands[6])) + "-" + ACTION.dateToNum(brokenUserCommands[4]) + "-" + LocalDate.now().getYear();
@@ -81,6 +84,7 @@ public class ActionTemplate
                     return -5;
                 }
 
+                //Filling the Action object's fields directly from the user's commands
                 ACTION.action = brokenUserCommands[2];
                 ACTION.time =  "";
                 ACTION.date = date;
@@ -88,11 +92,20 @@ public class ActionTemplate
                 break;
 
             case "brightness":
+                //Filling the Action object's fields directly from the user's commands
                 ACTION.action = brokenUserCommands[1];
+                //Calculates the new brightness for the screen in the case where there may be two
+                //separate words for one number (ex. one hundred, twenty five)
                 int newBrightness = ACTION.stringToNum(brokenUserCommands[3]) +
                         ACTION.stringToNum(brokenUserCommands[4]);
                 ACTION.data = "" + newBrightness;
                 break;
+
+            case "FFSearch":
+                //In the case of Freeform searching, no template is required as it needs only be
+                //sent directly to the user's browser as is with no pre-processing applied
+                ACTION.action = "FFSearch";
+            break;
 
             default:
                 Log.e("personalAssistant.ActionTemplate", "Could not build template");
@@ -116,6 +129,10 @@ class Action
     Date date;
     String data = "";
 
+    /*
+    Converts user's input of numbers as words into actionable integer values by utalizing hashmaps
+    for quick lookup functionality
+     */
     protected int stringToNum(String string)
     {
         if(string == null)
@@ -155,6 +172,10 @@ class Action
         return num;
     }
 
+    /*
+    Converts user's input of months/days as words into actionable integer values by utalizing hashmaps
+    for quick lookup functionality
+     */
     protected int dateToNum(String string)
     {
         if(string == null)
@@ -189,8 +210,14 @@ class Action
         return result;
     }
 
-    protected void dumpParams()
+    @Override
+    public String toString()
     {
+        String actionData = "\naction: "+ action;
+        String timeData = "\ntime: " + time;
+        String dateData = "\ndate: " + date;
+        String dataData = "\ndata: " + data;
         System.out.printf("%naction:%s%ntime:%s%ndate:%s%ndata:%s%n",action,time,date,data);
+        return actionData+timeData+dateData+dataData;
     }
 }

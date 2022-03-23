@@ -17,6 +17,9 @@
     <string name="open_app">Open an application</string>
     <string name="set_user">Set User\'s name</string>
     <string name="set_assistant">Set Assistant\'s name</string>
+    <string name="FFSpeech">Toggle Freeform Speech</string>
+    <string name="FFOn">Freeform Speech On</string>
+    <string name="FFOff">Freeform Speech Off</string>
 
     <string name="kws_caption">To start demonstration say \"oh mighty computer\".</string>
     <string name="menu_caption">Say \"digits\", \"forecast\" or \"phones\" to choose the grammar, language model or phonetic decoder example.</string>

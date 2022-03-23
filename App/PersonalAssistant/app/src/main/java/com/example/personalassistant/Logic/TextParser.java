@@ -1,5 +1,6 @@
 package com.example.personalassistant.Logic;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.AlarmClock;
@@ -8,7 +9,6 @@ import android.widget.Toast;
 import android.provider.Settings;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 
 import static android.widget.Toast.makeText;
 
@@ -20,21 +20,31 @@ public class TextParser extends AppCompatActivity
     private final Context REFERENCE;
     private Intent intent;
 
-    public TextParser(String userCommand, Context context)
+    public TextParser(String userCommand, Context context, boolean FFsearch)
     {
         REFERENCE = context;
 
-        if(userCommand != null)
+        //Gate for FFsearch as freeform searching is immediately handled
+        if(userCommand != null && !FFsearch)
         {
-            this.template = classifyString(userCommand);
+            //First initializes the action template
+            template = classifyString(userCommand);
 
-            if(template.getAction().action != null)
-                this.intent = intentBuilder(template);
+            //Then creates the intent using the action template
+            if(template != null && template.getAction().action != null)
+                intent = intentBuilder(template);
             else
                 makeText(REFERENCE, "Couldn't resolve Template", Toast.LENGTH_SHORT).show();
         }
-        else
-            makeText(REFERENCE, "Couldn't resolve input", Toast.LENGTH_SHORT).show();
+        else if(userCommand != null && FFsearch)
+        {
+            template = new ActionTemplate();
+            template.setAction("FFSearch", breakString(userCommand));
+
+            intent = new Intent(Intent.ACTION_WEB_SEARCH);
+            intent.putExtra(SearchManager.QUERY, userCommand);
+        }
+        else makeText(REFERENCE, "Couldn't resolve input", Toast.LENGTH_SHORT).show();
     }
 
     private ActionTemplate classifyString(String userCommand)
@@ -42,6 +52,8 @@ public class TextParser extends AppCompatActivity
         String[] brokenString = breakString(userCommand);
         String decipheredAction;
 
+        //Due to the user commands being in a structured format, all placements for necessary
+        //parts are known in advance and can be referenced directly
         switch(brokenString[1])
         {
             case "brightness":
@@ -66,6 +78,7 @@ public class TextParser extends AppCompatActivity
 
         ActionTemplate template = new ActionTemplate();
 
+        //Handles possible errors for the various inputs from the user
         switch(template.setAction(decipheredAction, brokenString))
         {
             case -1:
@@ -91,9 +104,18 @@ public class TextParser extends AppCompatActivity
         }
     }
 
+    /*
+    Utility function for splitting a user's command from "something like this" to an
+    array of strings such as {"something", "like", "this"}
+     */
     private String[] breakString(String input)
     {
-        String[] brokenString = new String[10];
+        int wordCount = 2;
+        for(char character: input.toCharArray())
+            if(character == ' ')
+                wordCount++;
+
+        String[] brokenString = new String[wordCount];
         String temp = "";
         int count = 0;
 
@@ -115,6 +137,10 @@ public class TextParser extends AppCompatActivity
         return brokenString;
     }
 
+    /*
+    Creates the various intents for the different types of commands
+    by using the action template for the relevant information from the user's command
+     */
     private Intent intentBuilder(ActionTemplate actionable)
     {
         Intent intent = null;
@@ -155,6 +181,8 @@ public class TextParser extends AppCompatActivity
                 int nextDay = 86400001;
                 Date current = new Date();
 
+                //If the desired date is for a day/month pair that has already passed, then addOn
+                //is set such that the date of the reminder is the following year
                 if(actionable.getAction().date.getTime() < current.getTime())
                     addOn = 31556952000L;
 
@@ -166,6 +194,7 @@ public class TextParser extends AppCompatActivity
                 break;
 
             case "brightness":
+                //Calculates the new brightness from the user's desired level against the max possible
                 final float maxBrightness = 255;
                 float newBrightness = maxBrightness * ((float) Integer.parseInt(actionable.getAction().data) / 100f);
 
