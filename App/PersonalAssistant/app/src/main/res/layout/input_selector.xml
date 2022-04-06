@@ -65,7 +65,7 @@
         app:layout_constraintTop_toBottomOf="@+id/setAlarm" />
 
     <Button
-        android:id="@+id/setAssName"
+        android:id="@+id/setActPhrase"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
@@ -75,18 +75,6 @@
         app:layout_constraintEnd_toEndOf="@+id/setTimer"
         app:layout_constraintStart_toStartOf="@+id/setTimer"
         app:layout_constraintTop_toBottomOf="@+id/setTimer" />
-
-    <Button
-        android:id="@+id/setUsrName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"
-        android:backgroundTint="@color/colorPrimary"
-        android:text="@string/set_user"
-        app:layout_constraintEnd_toEndOf="@+id/setAssName"
-        app:layout_constraintStart_toStartOf="@+id/setAssName"
-        app:layout_constraintTop_toBottomOf="@+id/setAssName" />
 
     <Button
         android:id="@+id/prevButt"

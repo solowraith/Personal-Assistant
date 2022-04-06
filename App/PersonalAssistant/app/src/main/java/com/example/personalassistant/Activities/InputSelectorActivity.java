@@ -1,48 +1,55 @@
 package com.example.personalassistant.Activities;
 
+import static android.widget.Toast.makeText;
+
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.AlarmClock;
 import android.provider.CalendarContract;
+import android.text.InputType;
 import android.text.format.Time;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.personalassistant.R;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Calendar;
 
-public class InputSelectorActivity extends AppCompatActivity
-{
-    private int[] contextList = {R.id.setReminder,R.id.setAlarm,R.id.setTimer,
-            R.id.setAssName,R.id.setUsrName};
+public class InputSelectorActivity extends AppCompatActivity {
+    private final int[] contextList = {R.id.setReminder, R.id.setAlarm, R.id.setTimer,
+            R.id.setActPhrase};
 
-    private Button[] buttonList = new Button[contextList.length];
-    private float clickedPos = 200;
+    private final Button[] buttonList = new Button[contextList.length];
+    private final float clickedPos = 200;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.input_selector);
 
         //Attaches references to their respective buttons
-        for(int i = 0; i < buttonList.length; i++)
+        for (int i = 0; i < buttonList.length; i++)
             buttonList[i] = findViewById(contextList[i]);
 
         buttonList[0].setOnClickListener(new View.OnClickListener() { //Setting a reminder
             @Override
-            public void onClick(View view)
-            {
-                for(Button butt: buttonList)
-                    if(butt != buttonList[0])
+            public void onClick(View view) {
+                for (Button butt : buttonList)
+                    if (butt != buttonList[0])
                         butt.setVisibility(View.INVISIBLE);
                 buttonList[0].setY(clickedPos);
 
@@ -53,10 +60,10 @@ public class InputSelectorActivity extends AppCompatActivity
         buttonList[1].setOnClickListener(new View.OnClickListener() { //Setting an alarm
             @Override
             public void onClick(View view) {
-                for(Button butt: buttonList)
-                    if(butt != buttonList[1])
+                for (Button butt : buttonList)
+                    if (butt != buttonList[1])
                         butt.setVisibility(View.INVISIBLE);
-                buttonList[0].setY(clickedPos);
+                buttonList[1].setY(clickedPos);
 
                 showDialog(1);
             }
@@ -65,28 +72,37 @@ public class InputSelectorActivity extends AppCompatActivity
         buttonList[2].setOnClickListener(new View.OnClickListener() { //Setting an Timer
             @Override
             public void onClick(View view) {
-                for(Button butt: buttonList)
-                    if(butt != buttonList[1])
+                for (Button butt : buttonList)
+                    if (butt != buttonList[2])
                         butt.setVisibility(View.INVISIBLE);
-                buttonList[0].setY(clickedPos);
+                buttonList[2].setY(clickedPos);
 
                 showDialog(2);
+            }
+        });
+
+        buttonList[3].setOnClickListener(new View.OnClickListener() { //Setting Activation Phrase
+            @Override
+            public void onClick(View view) {
+                for (Button butt : buttonList)
+                    if (butt != buttonList[3])
+                        butt.setVisibility(View.INVISIBLE);
+                buttonList[3].setY(clickedPos);
+
+                showDialog(3);
             }
         });
     }
 
     @Override
-    protected Dialog onCreateDialog(int dialogID)
-    {
+    protected Dialog onCreateDialog(int dialogID) {
         Calendar present = Calendar.getInstance(); //Gets current time/date
 
-        switch(dialogID)
-        {
+        switch (dialogID) {
             case 0: //Date Dialog
-                DatePickerDialog dateDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener(){
+                DatePickerDialog dateDialog = new DatePickerDialog(this, new DatePickerDialog.OnDateSetListener() {
                     public void onDateSet(DatePicker view, int year,
-                                          int monthOfYear, int dayOfMonth)
-                    {
+                                          int monthOfYear, int dayOfMonth) {
                         //Converts chosen date to millisecond representation
                         Time chosenDate = new Time();
                         chosenDate.set(dayOfMonth, monthOfYear, year);
@@ -102,7 +118,7 @@ public class InputSelectorActivity extends AppCompatActivity
                         startActivity(intent);
 
                     }
-                }, present.get(Calendar.YEAR),present.get(Calendar.MONTH), present.get(Calendar.DAY_OF_MONTH));
+                }, present.get(Calendar.YEAR), present.get(Calendar.MONTH), present.get(Calendar.DAY_OF_MONTH));
                 dateDialog.setMessage("Select date for reminder");
 
                 return dateDialog;
@@ -112,9 +128,7 @@ public class InputSelectorActivity extends AppCompatActivity
                     @Override
                     public void onTimeSet(TimePicker timePicker, int hour, int minute) {
                         //If the chosen time is 12PM or later, must detect and be set for intent
-                        boolean isPM= false;
-                        if(hour >= 12)
-                            isPM = true;
+                        boolean isPM = hour >= 12;
 
                         //Builds intent, similar structure to TextParser.intentBuilder()
                         Intent intent = new Intent(AlarmClock.ACTION_SET_ALARM);
@@ -142,7 +156,7 @@ public class InputSelectorActivity extends AppCompatActivity
                         //Builds intent, similar structure to TextParser.intentBuilder()
                         Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER);
                         intent.putExtra(AlarmClock.EXTRA_SKIP_UI, false);
-                        intent.putExtra(AlarmClock.EXTRA_LENGTH, hour*3600 + minute*60);
+                        intent.putExtra(AlarmClock.EXTRA_LENGTH, hour * 3600 + minute * 60);
 
                         startActivity(intent);
                     }
@@ -152,26 +166,62 @@ public class InputSelectorActivity extends AppCompatActivity
 
                 return timerDialog;
 
-            //TODO: Do something with assistant/user names
             case 3: //Assistant Name Dialog
-            case 4: //User Name Dialog
+                AlertDialog.Builder inputDialog = new AlertDialog.Builder(this);
+                inputDialog.setTitle("Input desired activation phrase (Must only use english words)");
+
+                final EditText input = new EditText(this);
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                inputDialog.setView(input);
+
+                inputDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        String userInput = input.getText().toString();
+
+                        String state = Environment.getExternalStorageState();
+                        if (!Environment.MEDIA_MOUNTED.equals(state)) {
+                            //If it isn't mounted - we can't write into it.
+                            return;
+                        }
+
+                        File activationPhrase = new File(InputSelectorActivity.this.getExternalFilesDir(null), "activationPhrase.txt");
+                        FileOutputStream outputStream;
+
+                        try {
+                            if (activationPhrase.createNewFile() || activationPhrase.isFile()) {
+                                outputStream = new FileOutputStream(activationPhrase, false);
+                                outputStream.write(userInput.toLowerCase().getBytes());
+                                outputStream.write("\n".getBytes());
+                                outputStream.flush();
+                                outputStream.close();
+                            } else
+                                makeText(InputSelectorActivity.this, "Couldn't write to activationPhrase.txt", Toast.LENGTH_SHORT).show();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+                inputDialog.show();
+
+                break;
 
         }
 
         return null;
     }
 
-    public void toMain(View view)
-    {
+    public void toMain(View view) {
         //Swaps functionality of previous button, if buttons are hidden then returns the user to
         //the unhidden state of the activity, otherwise returns the user to the main activity screen
         boolean notVisible = false;
-        for(Button butt : buttonList)
-            if(butt.getVisibility() == View.INVISIBLE)
+        for (Button butt : buttonList)
+            if (butt.getVisibility() == View.INVISIBLE)
                 notVisible = true;
 
         Intent intent;
-        if(notVisible)
+        if (notVisible)
             intent = new Intent(InputSelectorActivity.this, InputSelectorActivity.class);
         else
             intent = new Intent(InputSelectorActivity.this, MainActivity.class);
