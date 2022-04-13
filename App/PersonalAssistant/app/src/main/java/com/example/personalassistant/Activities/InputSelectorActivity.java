@@ -1,45 +1,75 @@
 package com.example.personalassistant.Activities;
 
-import static android.widget.Toast.makeText;
-
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.AlarmClock;
 import android.provider.CalendarContract;
 import android.text.InputType;
 import android.text.format.Time;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.personalassistant.R;
+import com.google.android.material.chip.Chip;
 
-import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Calendar;
+import java.util.Properties;
 
 public class InputSelectorActivity extends AppCompatActivity {
+    private static final String LOG_TAG_IS = "InputSelector";
     private final int[] contextList = {R.id.setReminder, R.id.setAlarm, R.id.setTimer,
-            R.id.setActPhrase};
-
+            R.id.setActPhrase, R.id.editConfig};
+    private final int[] chipContext = {R.id.showUIAlarm, R.id.showUITimer};
+    private final Chip[] chipsList = new Chip[chipContext.length];
     private final Button[] buttonList = new Button[contextList.length];
     private final float clickedPos = 200;
+    private boolean UITimer;
+    private boolean UIAlarm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.input_selector);
+        UITimer = Boolean.parseBoolean(getPropValue("showUITimer", false));
+        UIAlarm = Boolean.parseBoolean(getPropValue("showUIAlarm", false));
+
+        for (int i = 0; i < chipContext.length; i++) {
+            chipsList[i] = findViewById(chipContext[i]);
+            chipsList[i].setVisibility(Chip.INVISIBLE);
+        }
+
+        if (UIAlarm) {
+            chipsList[0].setTextColor(getResources().getColor(R.color.white));
+            chipsList[0].setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(R.color.green)));
+        } else {
+            chipsList[0].setTextColor(getResources().getColor(R.color.black));
+            chipsList[0].setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(R.color.red)));
+        }
+
+        if (UITimer) {
+            chipsList[1].setTextColor(getResources().getColor(R.color.white));
+            chipsList[1].setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(R.color.green)));
+        } else {
+            chipsList[1].setTextColor(getResources().getColor(R.color.black));
+            chipsList[1].setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(R.color.red)));
+        }
 
         //Attaches references to their respective buttons
         for (int i = 0; i < buttonList.length; i++)
@@ -52,7 +82,6 @@ public class InputSelectorActivity extends AppCompatActivity {
                     if (butt != buttonList[0])
                         butt.setVisibility(View.INVISIBLE);
                 buttonList[0].setY(clickedPos);
-
                 showDialog(0);
             }
         });
@@ -90,6 +119,53 @@ public class InputSelectorActivity extends AppCompatActivity {
                 buttonList[3].setY(clickedPos);
 
                 showDialog(3);
+            }
+        });
+
+        buttonList[4].setOnClickListener(new View.OnClickListener() { //Edit Config for showUI's
+            @Override
+            public void onClick(View view) {
+                for (Button butt : buttonList)
+                    if (butt != buttonList[4])
+                        butt.setVisibility(View.INVISIBLE);
+
+                for (Chip chip : chipsList)
+                    if (chip.getVisibility() == Chip.INVISIBLE)
+                        chip.setVisibility(Chip.VISIBLE);
+
+                chipsList[0].setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        UIAlarm = !UIAlarm;
+                        setProperty("showUIAlarm", "" + UIAlarm);
+                        if (UIAlarm) {
+                            chipsList[0].setTextColor(getResources().getColor(R.color.white));
+                            chipsList[0].setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(R.color.green)));
+                        } else {
+                            chipsList[0].setTextColor(getResources().getColor(R.color.black));
+                            chipsList[0].setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(R.color.red)));
+                        }
+                    }
+                });
+
+                chipsList[1].setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        UITimer = !UITimer;
+                        setProperty("showUITimer", "" + UITimer);
+                        if (UITimer) {
+                            chipsList[1].setTextColor(getResources().getColor(R.color.white));
+                            chipsList[1].setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(R.color.green)));
+                        } else {
+                            chipsList[1].setTextColor(getResources().getColor(R.color.black));
+                            chipsList[1].setChipBackgroundColor(ColorStateList.valueOf(getResources().getColor(R.color.red)));
+                        }
+                    }
+                });
+
+                buttonList[4].setY(clickedPos);
+
+                showDialog(4);
             }
         });
     }
@@ -177,29 +253,7 @@ public class InputSelectorActivity extends AppCompatActivity {
                 inputDialog.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        String userInput = input.getText().toString();
-
-                        String state = Environment.getExternalStorageState();
-                        if (!Environment.MEDIA_MOUNTED.equals(state)) {
-                            //If it isn't mounted - we can't write into it.
-                            return;
-                        }
-
-                        File activationPhrase = new File(InputSelectorActivity.this.getExternalFilesDir(null), "activationPhrase.txt");
-                        FileOutputStream outputStream;
-
-                        try {
-                            if (activationPhrase.createNewFile() || activationPhrase.isFile()) {
-                                outputStream = new FileOutputStream(activationPhrase, false);
-                                outputStream.write(userInput.toLowerCase().getBytes());
-                                outputStream.write("\n".getBytes());
-                                outputStream.flush();
-                                outputStream.close();
-                            } else
-                                makeText(InputSelectorActivity.this, "Couldn't write to activationPhrase.txt", Toast.LENGTH_SHORT).show();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        setProperty("activationPhrase", input.getText().toString());
                     }
                 });
 
@@ -227,5 +281,43 @@ public class InputSelectorActivity extends AppCompatActivity {
             intent = new Intent(InputSelectorActivity.this, MainActivity.class);
 
         startActivity(intent);
+    }
+
+    private void setProperty(String propName, String val) {
+        try {
+            FileInputStream in = new FileInputStream(getExternalFilesDir(null) + "/userconfig.properties");
+            Properties prop = new Properties();
+            prop.load(in);
+            prop.setProperty(propName, val);
+
+            FileOutputStream output = new FileOutputStream(getExternalFilesDir(null) + "/userconfig.properties", false);
+            prop.store(output, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getPropValue(String desired, boolean loadDefault) {
+        InputStream input;
+        try {
+            Properties properties = new Properties();
+            if (loadDefault)
+                input = new FileInputStream(getExternalFilesDir(null) + "/defaultconfig.properties");//getClass().getClassLoader().getResourceAsStream("defaultconfig.properties");
+            else
+                input = new FileInputStream(getExternalFilesDir(null) + "/userconfig.properties");//getClass().getClassLoader().getResourceAsStream("defaultconfig.properties");
+
+            if (input != null) {
+                properties.load(input);
+            } else {
+                throw new FileNotFoundException("File not found in classPath");
+            }
+
+            String result = properties.getProperty(desired);
+            input.close();
+            return result;
+        } catch (Exception e) {
+            Log.e(LOG_TAG_IS, Log.getStackTraceString(e));
+        }
+        return "";
     }
 }

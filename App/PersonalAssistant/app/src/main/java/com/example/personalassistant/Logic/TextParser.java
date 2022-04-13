@@ -13,10 +13,17 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Date;
+import java.util.Properties;
 
 public class TextParser extends AppCompatActivity {
+    private final String LOG_TAG_TP = "TextProcessing";
     private final Context REFERENCE;
+    boolean showUITimer = false;
+    boolean showUIAlarm = false;
     private ActionTemplate template;
     private Intent intent;
 
@@ -40,7 +47,7 @@ public class TextParser extends AppCompatActivity {
             intent = new Intent(Intent.ACTION_WEB_SEARCH);
             intent.putExtra(SearchManager.QUERY, userCommand);
         } else {
-            Log.e("TextParser", "Couldn't resolve given input, usercommand = null");
+            Log.e(LOG_TAG_TP, "Couldn't resolve given input, usercommand = null");
             makeText(REFERENCE, "Couldn't resolve input", Toast.LENGTH_SHORT).show();
             template.setAction("error", new String[]{""});
             intent = null;
@@ -74,7 +81,7 @@ public class TextParser extends AppCompatActivity {
                         break;
 
                     default:
-                        Log.e("TextParser", "Couldn't parse given input:\n" + userCommand != null ? userCommand : "");
+                        Log.e(LOG_TAG_TP, "Couldn't parse given input:\n" + userCommand != null ? userCommand : "");
                         makeText(REFERENCE, "Couldn't parse input", Toast.LENGTH_LONG).show();
                         decipheredAction = "N/A";
                         break;
@@ -82,31 +89,32 @@ public class TextParser extends AppCompatActivity {
         }
 
         ActionTemplate template = new ActionTemplate();
+        String methodTag = ".classifyString";
 
         //Handles possible errors for the various inputs from the user
         switch (template.setAction(decipheredAction, brokenString)) {
             case -1:
-                Log.e("TextParser.classifyString", "Alarm hour out of bounds");
+                Log.e(LOG_TAG_TP + methodTag, "Alarm hour out of bounds");
                 makeText(REFERENCE, "Alarm hour out of bounds", Toast.LENGTH_LONG).show();
                 return null;
             case -2:
-                Log.e("TextParser.classifyString", "Alarm minute out of bounds");
+                Log.e(LOG_TAG_TP + methodTag, "Alarm minute out of bounds");
                 makeText(REFERENCE, "Alarm minute out of bounds", Toast.LENGTH_LONG).show();
                 return null;
             case -3:
-                Log.e("TextParser.classifyString", "Reminder day out of bounds");
+                Log.e(LOG_TAG_TP + methodTag, "Reminder day out of bounds");
                 makeText(REFERENCE, "Reminder day out of bounds", Toast.LENGTH_LONG).show();
                 return null;
             case -4:
-                Log.e("TextParser.classifyString", "Reminder month out of bounds");
+                Log.e(LOG_TAG_TP + methodTag, "Reminder month out of bounds");
                 makeText(REFERENCE, "Reminder month out of bounds", Toast.LENGTH_LONG).show();
                 return null;
             case -5:
-                Log.e("TextParser.classifyString", "Could not parse date");
+                Log.e(LOG_TAG_TP + methodTag, "Could not parse date");
                 makeText(REFERENCE, "Could not parse date", Toast.LENGTH_LONG).show();
                 return null;
             case -10:
-                Log.e("TextParser.classifyString", "Parsing error in Action Log");
+                Log.e(LOG_TAG_TP + methodTag, "Parsing error in Action Log");
                 makeText(REFERENCE, "Parsing error in Action Log", Toast.LENGTH_LONG).show();
                 return null;
             default:
@@ -149,6 +157,11 @@ public class TextParser extends AppCompatActivity {
      */
     private Intent intentBuilder(ActionTemplate actionable) {
         Intent intent = null;
+        String methodTag = ".intentBuilder";
+
+        showUIAlarm = Boolean.parseBoolean(getPropValue("showUIAlarm", false));
+        showUITimer = Boolean.parseBoolean(getPropValue("showUITimer", false));
+
 
         switch (actionable.getActionContainer().getAction()) {
             case "alarm":
@@ -161,12 +174,12 @@ public class TextParser extends AppCompatActivity {
                 intent.putExtra(AlarmClock.EXTRA_HOUR, alarmHour);
                 intent.putExtra(AlarmClock.EXTRA_MINUTES, alarmMin);
                 intent.putExtra(AlarmClock.EXTRA_IS_PM, isPM);
-                intent.putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                intent.putExtra(AlarmClock.EXTRA_SKIP_UI, showUIAlarm);
                 break;
 
             case "timer":
                 intent = new Intent(AlarmClock.ACTION_SET_TIMER);
-                intent.putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                intent.putExtra(AlarmClock.EXTRA_SKIP_UI, showUITimer);
                 int timerLengthH = Integer.parseInt(actionable.getActionContainer().getTime()) * 3600;
                 int timerLengthM = Integer.parseInt(actionable.getActionContainer().getTime()) * 60;
                 int timerLengthS = Integer.parseInt(actionable.getActionContainer().getTime());
@@ -218,7 +231,7 @@ public class TextParser extends AppCompatActivity {
                 break;
 
             default:
-                Log.e("TextParser.intentBuilder", "Couldn't build intent, input not recognized");
+                Log.e(LOG_TAG_TP + methodTag, "Couldn't build intent, input not recognized");
                 makeText(REFERENCE, "Couldn't build intent, input not recognized", Toast.LENGTH_SHORT).show();
                 break;
         }
@@ -236,5 +249,29 @@ public class TextParser extends AppCompatActivity {
 
     public ActionTemplate getActionTemplate() {
         return template;
+    }
+
+    protected String getPropValue(String desired, boolean loadDefault) {
+        InputStream input;
+        try {
+            Properties properties = new Properties();
+            if (loadDefault)
+                input = new FileInputStream(REFERENCE.getExternalFilesDir(null) + "/defaultconfig.properties");//getClass().getClassLoader().getResourceAsStream("defaultconfig.properties");
+            else
+                input = new FileInputStream(REFERENCE.getExternalFilesDir(null) + "/userconfig.properties");//getClass().getClassLoader().getResourceAsStream("defaultconfig.properties");
+
+            if (input != null) {
+                properties.load(input);
+            } else {
+                throw new FileNotFoundException("File not found in classPath");
+            }
+
+            String result = properties.getProperty(desired);
+            input.close();
+            return result;
+        } catch (Exception e) {
+            Log.e(LOG_TAG_TP, Log.getStackTraceString(e));
+        }
+        return "";
     }
 }

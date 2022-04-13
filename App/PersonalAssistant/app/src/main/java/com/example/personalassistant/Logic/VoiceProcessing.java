@@ -17,7 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
-import java.util.Scanner;
+import java.util.Properties;
 
 import edu.cmu.pocketsphinx.Assets;
 import edu.cmu.pocketsphinx.Hypothesis;
@@ -29,9 +29,10 @@ public class VoiceProcessing extends Activity implements RecognitionListener {
     private static final String USR_INPUT = "User Commands";
     private static final String FF_SPEECH = "Freeform Speech";
     private static final String KWS_SEARCH = "Passive Speech";
-    private static final String DEFAULT_KEYPHRASE = "listen";
+    private final String LOG_TAG_VP = "VoiceProcessing";
     private final Context REFERENCE;
     public boolean toggle; //Determines whether command mode(false) or FFSearch(true)
+    private final String default_keyphrase;
     private String chosenKeyPhrase;
     private boolean passiveSpeech = false;
     private SpeechRecognizer recognizer;
@@ -39,6 +40,7 @@ public class VoiceProcessing extends Activity implements RecognitionListener {
     public VoiceProcessing(MainActivity activity) {
         toggle = false;
         REFERENCE = activity.getApplicationContext();
+        default_keyphrase = getPropValue("activationPhrase", true);
         new SetupTask(activity).execute();
     }
 
@@ -58,8 +60,7 @@ public class VoiceProcessing extends Activity implements RecognitionListener {
             return;
 
         if (passiveSpeech && hypothesis.getHypstr().equals(chosenKeyPhrase)) {
-            makeText(REFERENCE, hypothesis.getHypstr(), Toast.LENGTH_LONG).show();
-            System.out.println(hypothesis.getHypstr());
+            Log.i(LOG_TAG_VP, "Detected keyphrase:" + hypothesis.getHypstr());
             startListening(false);
         }
     }
@@ -73,7 +74,8 @@ public class VoiceProcessing extends Activity implements RecognitionListener {
             writeFileExternalStorage(hypothesis.getHypstr());
 
             //Displays the user's input back to them
-            makeText(REFERENCE, hypothesis.getHypstr(), Toast.LENGTH_LONG).show();
+            if (!recognizer.getSearchName().equals(KWS_SEARCH))
+                makeText(REFERENCE, hypothesis.getHypstr(), Toast.LENGTH_LONG).show();
             System.out.println(hypothesis.getHypstr());
             toTextParser(hypothesis.getHypstr());
         } else
@@ -168,6 +170,31 @@ public class VoiceProcessing extends Activity implements RecognitionListener {
         MainActivity.textParser.setValue(tp);
     }
 
+    //TODO: Fix filenotfound error here and in textparser on properties files
+    protected String getPropValue(String desired, boolean loadDefault) {
+        FileInputStream input;
+        try {
+            Properties properties = new Properties();
+            if (loadDefault)
+                input = new FileInputStream(REFERENCE.getExternalFilesDir(null) + "/defaultconfig.properties");//getClass().getClassLoader().getResourceAsStream("defaultconfig.properties");
+            else
+                input = new FileInputStream(REFERENCE.getExternalFilesDir(null) + "/userconfig.properties");//getClass().getClassLoader().getResourceAsStream("defaultconfig.properties");
+
+            if (input != null) {
+                properties.load(input);
+            } else {
+                throw new FileNotFoundException("File not found in classPath");
+            }
+
+            String result = properties.getProperty(desired);
+            input.close();
+            return result;
+        } catch (Exception e) {
+            Log.e(LOG_TAG_VP, Log.getStackTraceString(e));
+        }
+        return "";
+    }
+
     /*
     Class provided with cmuPocketSphinx, initializes the recognizer on a separate thread
      */
@@ -183,20 +210,10 @@ public class VoiceProcessing extends Activity implements RecognitionListener {
             try {
                 Assets assets = new Assets(activityReference.get());
                 File assetDir = assets.syncAssets();
-                String keyPhrase = "";
-                try {
-                    FileInputStream input = new FileInputStream(REFERENCE.getExternalFilesDir(null) + "/activationPhrase.txt");
-
-                    keyPhrase = new Scanner(input).nextLine();
-                    Log.e("VoiceProcessing", "Read Phrase:" + keyPhrase + ":");
-
-                } catch (FileNotFoundException e) {
-                    Log.e("VoiceProcessing", "Could not read activationPhrase.txt");
-                    e.printStackTrace();
-                }
+                String keyPhrase = getPropValue("activationPhrase", false);
 
                 if (keyPhrase == null || keyPhrase.equals("") || keyPhrase.equals(" "))
-                    chosenKeyPhrase = DEFAULT_KEYPHRASE;
+                    chosenKeyPhrase = default_keyphrase;
                 else
                     chosenKeyPhrase = keyPhrase;
 
@@ -211,13 +228,13 @@ public class VoiceProcessing extends Activity implements RecognitionListener {
         @Override
         protected void onPostExecute(Exception result) {
             if (result != null) {
-                Log.e("VoiceProcessing", "cmuSphinx failed to initialize recognizer module");
+                Log.e(LOG_TAG_VP, "cmuSphinx failed to initialize recognizer module");
                 makeText(REFERENCE, "Failed to init recognizer ", Toast.LENGTH_LONG).show();
                 result.printStackTrace();
             }
             //Alerts the mainActivity that the recognizer has finished loading
             MainActivity.recogInit.setValue(true);
-            Log.i("VoiceProcessing", "Activation phrase set to:" + chosenKeyPhrase);
+            Log.i(LOG_TAG_VP, "Activation phrase set to:" + chosenKeyPhrase);
             makeText(REFERENCE, "Recognizer ready to receive input", Toast.LENGTH_SHORT).show();
         }
     }

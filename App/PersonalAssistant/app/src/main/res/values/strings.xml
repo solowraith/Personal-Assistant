@@ -20,6 +20,9 @@
     <string name="FFSpeech">Toggle Freeform Speech</string>
     <string name="FFOn">Freeform Speech On</string>
     <string name="FFOff">Freeform Speech Off</string>
+    <string name="editConfig">Configure Settings</string>
+    <string name="showUITimerChip">Show Timer screen</string>
+    <string name="showUIAlarmChip">Show Alarm screen</string>
 
     <string name="loading">Loading Speech Recognition</string>
 

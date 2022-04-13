@@ -32,17 +32,20 @@ import com.example.personalassistant.Logic.VoiceProcessing;
 import com.example.personalassistant.R;
 import com.google.android.material.chip.Chip;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Properties;
 
 public class MainActivity extends AppCompatActivity {
     private static final int ALL_PERMISSIONS_ACCEPTED = 100;
-    private static final String LOG_TAG_Audio = "AudioRecording";
+    private static final String LOG_TAG_AUDIO = "AudioRecording";
     private static final String LOG_TAG_INTENT = "IntentLauncher";
+    private static final MutableLiveData<Boolean> ttsSetUp = new MutableLiveData<>(false);
     public static MutableLiveData<Boolean> recogInit = new MutableLiveData<>(false);
     public static MutableLiveData<TextParser> textParser = new MutableLiveData<>();
     protected static VoiceProcessing vp;
-    private static final MutableLiveData<Boolean> ttsSetUp = new MutableLiveData<>(false);
     private static String fileName = null;
     private static MediaPlayer recordingSound;
     private static MediaRecorder recorder;
@@ -88,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             recorder.prepare();
         } catch (IOException e) {
-            Log.e(LOG_TAG_Audio, "prepare() failed");
+            Log.e(LOG_TAG_AUDIO, "prepare() failed");
         }
 
         recorder.start();
@@ -99,10 +102,41 @@ public class MainActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         recogInit.setValue(false);
-
         pm = this.getPackageManager();
+
+        File defaultValue, userValue;
+
+        defaultValue = new File(getApplication().getExternalFilesDir(null), "defaultconfig.properties");
+        userValue = new File(getApplication().getExternalFilesDir(null), "userconfig.properties");
+
+        try {
+            if (!defaultValue.exists() || defaultValue.createNewFile()) {
+                FileOutputStream output = new FileOutputStream(defaultValue, false);
+                Properties prop = new Properties();
+                prop.setProperty("activationPhrase", "listen");
+                prop.setProperty("showUITimer", "true");
+                prop.setProperty("showUIAlarm", "true");
+
+                prop.store(output, null);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            if (!userValue.exists() || userValue.createNewFile()) {
+                FileOutputStream output = new FileOutputStream(userValue, false);
+                Properties prop = new Properties();
+                prop.setProperty("activationPhrase", "listen");
+                prop.setProperty("showUITimer", "true");
+                prop.setProperty("showUIAlarm", "true");
+
+                prop.store(output, null);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // sets filepath of the recording to the external cache directory for transparency
         fileName = getExternalCacheDir().getAbsolutePath();
@@ -160,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
         vp = new VoiceProcessing(MainActivity.this);
 
         //Grabs references to all relevant buttons on screen
-        Chip toggleFF = findViewById(R.id.chip4);
+        Chip toggleFF = findViewById(R.id.ffSpeechChip);
         ImageButton button = findViewById(R.id.imageButton4);
         ProgressBar progress = findViewById(R.id.progressBar);
         TextView text = findViewById(R.id.textView);

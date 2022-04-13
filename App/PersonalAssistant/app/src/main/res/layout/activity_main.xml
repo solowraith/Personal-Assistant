@@ -66,22 +66,8 @@
         app:layout_constraintVertical_bias="0.976"
         app:srcCompat="@android:drawable/ic_dialog_info" />
 
-    <Button
-        android:id="@+id/button12"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="toVoiceProcessing"
-        android:text="voiceProcessing Debug"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.604" />
-
     <com.google.android.material.chip.Chip
-        android:id="@+id/chip4"
+        android:id="@+id/ffSpeechChip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:checkable="true"
@@ -104,7 +90,7 @@
         android:layout_marginBottom="34dp"
         android:indeterminate="true"
         android:indeterminateTint="@color/colorPrimary"
-        app:layout_constraintBottom_toTopOf="@+id/chip4"
+        app:layout_constraintBottom_toTopOf="@+id/ffSpeechChip"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"

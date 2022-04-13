@@ -89,4 +89,37 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <Button
+        android:id="@+id/editConfig"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:text="@string/editConfig"
+        app:layout_constraintEnd_toEndOf="@+id/setActPhrase"
+        app:layout_constraintStart_toStartOf="@+id/setActPhrase"
+        app:layout_constraintTop_toBottomOf="@+id/setActPhrase" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/showUIAlarm"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="144dp"
+        android:text="@string/showUIAlarmChip"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/prevButt"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.chip.Chip
+        android:id="@+id/showUITimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
+        android:text="@string/showUITimerChip"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/showUIAlarm"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
