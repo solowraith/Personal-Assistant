@@ -212,7 +212,7 @@ public class InputSelectorActivity extends AppCompatActivity {
                         intent.putExtra(AlarmClock.EXTRA_HOUR, hour);
                         intent.putExtra(AlarmClock.EXTRA_MINUTES, minute);
                         intent.putExtra(AlarmClock.EXTRA_IS_PM, isPM);
-                        intent.putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                        intent.putExtra(AlarmClock.EXTRA_SKIP_UI, !UIAlarm);
 
                         startActivity(intent);
                     }
@@ -231,7 +231,7 @@ public class InputSelectorActivity extends AppCompatActivity {
 
                         //Builds intent, similar structure to TextParser.intentBuilder()
                         Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER);
-                        intent.putExtra(AlarmClock.EXTRA_SKIP_UI, false);
+                        intent.putExtra(AlarmClock.EXTRA_SKIP_UI, !UITimer);
                         intent.putExtra(AlarmClock.EXTRA_LENGTH, hour * 3600 + minute * 60);
 
                         startActivity(intent);

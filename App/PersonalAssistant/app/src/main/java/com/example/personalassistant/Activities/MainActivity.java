@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private static final MutableLiveData<Boolean> ttsSetUp = new MutableLiveData<>(false);
     public static MutableLiveData<Boolean> recogInit = new MutableLiveData<>(false);
     public static MutableLiveData<TextParser> textParser = new MutableLiveData<>();
+    public static TextView phraseDisplay;
     protected static VoiceProcessing vp;
     private static String fileName = null;
     private static MediaPlayer recordingSound;
@@ -104,6 +105,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         recogInit.setValue(false);
         pm = this.getPackageManager();
+        phraseDisplay = findViewById(R.id.phraseDisplay);
 
         File defaultValue, userValue;
 

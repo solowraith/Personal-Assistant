@@ -174,12 +174,12 @@ public class TextParser extends AppCompatActivity {
                 intent.putExtra(AlarmClock.EXTRA_HOUR, alarmHour);
                 intent.putExtra(AlarmClock.EXTRA_MINUTES, alarmMin);
                 intent.putExtra(AlarmClock.EXTRA_IS_PM, isPM);
-                intent.putExtra(AlarmClock.EXTRA_SKIP_UI, showUIAlarm);
+                intent.putExtra(AlarmClock.EXTRA_SKIP_UI, !showUIAlarm);
                 break;
 
             case "timer":
                 intent = new Intent(AlarmClock.ACTION_SET_TIMER);
-                intent.putExtra(AlarmClock.EXTRA_SKIP_UI, showUITimer);
+                intent.putExtra(AlarmClock.EXTRA_SKIP_UI, !showUITimer);
                 int timerLengthH = Integer.parseInt(actionable.getActionContainer().getTime()) * 3600;
                 int timerLengthM = Integer.parseInt(actionable.getActionContainer().getTime()) * 60;
                 int timerLengthS = Integer.parseInt(actionable.getActionContainer().getTime());

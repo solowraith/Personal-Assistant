@@ -157,6 +157,8 @@ public class VoiceProcessing extends Activity implements RecognitionListener {
 
         passiveSpeech = passiveListen;
 
+        MainActivity.phraseDisplay.setText("Listening for \n"+chosenKeyPhrase);
+
         if (passiveListen)
             recognizer.startListening(KWS_SEARCH);
         else if (!toggle)
